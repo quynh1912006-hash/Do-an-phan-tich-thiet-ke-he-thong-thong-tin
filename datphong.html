@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt phòng - Luxury Hotel</title>
+
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body id="datPhongPage" class="booking-page">
+    <header class="header__datphong">
+        <h1>Luxury Hotel</h1>
+    </header>
+
+    <main class="main__datphong">
+        <!-- Thanh thông tin giống ảnh: chỉ hiển thị dữ liệu đã tìm kiếm, không dùng select trực tiếp nên không bị vỡ UI -->
+        <section class="booking-search" aria-label="Thông tin tìm kiếm đặt phòng">
+            <div class="booking-search__inner">
+                <div id="searchSummary" class="booking-search__summary">
+                    <div class="summary-item">
+                        <span class="summary-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M12 21s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"></path><circle cx="12" cy="9" r="2.8"></circle></svg>
+                        </span>
+                        <div class="summary-text">
+                            <p>Khách sạn - Điểm đến</p>
+                            <b>Đang tải...</b>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M8 3v4M16 3v4M4 10h16"></path></svg>
+                        </span>
+                        <div class="summary-text">
+                            <p>Ngày nhận - Trả phòng</p>
+                            <b>Đang tải...</b>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0"></path><circle cx="12" cy="7" r="3"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+                        </span>
+                        <div class="summary-text">
+                            <p>Số phòng - Khách</p>
+                            <b>Đang tải...</b>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8Z"></path><path d="M13 6v12"></path></svg>
+                        </span>
+                        <div class="summary-text">
+                            <p>Mã giảm giá</p>
+                            <b>Đang tải...</b>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="booking-search__toggle" id="toggleSearchEdit">Thay đổi</button>
+            </div>
+
+            <div class="booking-edit-panel" id="searchEditPanel" hidden>
+                <form id="searchForm" action="./datphong.html" method="get">
+                    <div class="booking-edit-field booking-edit-field--des">
+                        <label for="destination">
+                            Khách sạn - Điểm đến
+                            <select name="destination" id="destination">
+                                <option value="">-- Chọn điểm đến --</option>
+                                <optgroup label="Phú Quốc">
+                                    <option value="fiesta-phu-quoc"> Fiesta Phú Quốc</option>
+                                    <option value="wonderland-phu-quoc"> Wonderland Phú Quốc</option>
+                                    <option value="resort-phu-quoc">Luxury Resort Phú Quốc</option>
+                                </optgroup>
+                                <optgroup label="Nha Trang">
+                                    <option value="nha-trang-resort"> Luxury Nha Trang</option>
+                                    <option value="nha-trang-beach">Nha Trang Beach Hotel</option>
+                                </optgroup>
+                                <optgroup label="Hội An">
+                                    <option value="resort-golf-hoi-an">Resort &amp; Golf Hội An</option>
+                                </optgroup>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="booking-edit-field booking-edit-field--dayin">
+                        <label for="dayin">
+                            Ngày nhận phòng
+                            <input type="date" name="dayin" id="dayin">
+                        </label>
+                    </div>
+
+                    <div class="booking-edit-field booking-edit-field--dayout">
+                        <label for="dayout">
+                            Ngày trả phòng
+                            <input type="date" name="dayout" id="dayout">
+                        </label>
+                    </div>
+
+                    <div class="booking-edit-field booking-edit-field--people">
+                        <label>
+                            Số phòng - Khách
+                            <div class="people-grid">
+                                <select name="rooms" id="room_count" aria-label="Số phòng">
+                                    <option value="1">1 phòng</option>
+                                    <option value="2">2 phòng</option>
+                                    <option value="3">3 phòng</option>
+                                    <option value="4">4 phòng</option>
+                                </select>
+                                <select name="adult" id="people__old" aria-label="Người lớn">
+                                    <option value="1">1 người lớn</option>
+                                    <option value="2">2 người lớn</option>
+                                    <option value="3">3 người lớn</option>
+                                    <option value="4">4 người lớn</option>
+                                    <option value="5">5 người lớn</option>
+                                    <option value="6">6 người lớn</option>
+                                </select>
+                                <select name="child" id="people__child" class="child" aria-label="Trẻ em">
+                                    <option value="0">0 trẻ em</option>
+                                    <option value="1">1 trẻ em</option>
+                                    <option value="2">2 trẻ em</option>
+                                    <option value="3">3 trẻ em</option>
+                                    <option value="4">4 trẻ em</option>
+                                    <option value="5">5 trẻ em</option>
+                                </select>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="booking-edit-field booking-edit-field--coupon">
+                        <label for="coupon">
+                            Mã giảm giá
+                            <input type="text" name="coupon" id="coupon" placeholder="Nhập mã KM">
+                        </label>
+                    </div>
+
+                    <div class="booking-edit-field booking-edit-field--search">
+                        <input type="submit" value="Tìm lại" id="btnSearch">
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="datphong__ketQua" aria-label="Kết quả đặt phòng">
+            <div class="datphong__ketQua--left">
+                <div id="hotelResult"></div>
+                <div id="chooseRoomTitle" class="choose-room-title">Chọn phòng</div>
+                <div id="roomResults" class="room-results"></div>
+            </div>
+
+            <aside class="datphong__ketQua--right" aria-label="Thông tin chuyến đi">
+                <div id="bookingPanel"></div>
+            </aside>
+        </section>
+    </main>
+
+    <script>
+        // Nút "Thay đổi" chỉ mở form sửa tìm kiếm, không làm thay đổi layout thanh thông tin.
+        const toggleSearchEdit = document.querySelector("#toggleSearchEdit");
+        const searchEditPanel = document.querySelector("#searchEditPanel");
+
+        if (toggleSearchEdit && searchEditPanel) {
+            toggleSearchEdit.addEventListener("click", function () {
+                const isHidden = searchEditPanel.hasAttribute("hidden");
+
+                if (isHidden) {
+                    searchEditPanel.removeAttribute("hidden");
+                    toggleSearchEdit.textContent = "Đóng";
+                } else {
+                    searchEditPanel.setAttribute("hidden", "");
+                    toggleSearchEdit.textContent = "Thay đổi";
+                }
+            });
+        }
+    </script>
+    <script src="./main.js"></script>
+    <script>
+        // Khi bấm nút "Đã đặt phòng" ở khung bên phải thì chuyển sang trang thanh toán.
+        // Nút này được render bằng main.js với class .btn-confirm.
+        document.addEventListener("click", function (event) {
+            const confirmButton = event.target.closest(".btn-confirm");
+
+            if (!confirmButton) return;
+
+            const bookingData = localStorage.getItem("luxury_hotel_booking");
+
+            if (!bookingData) {
+                alert("Bạn chưa chọn phòng. Hãy bấm Đặt phòng trước khi thanh toán.");
+                return;
+            }
+
+            window.location.href = "./thanhtoan.html";
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán thành công - Luxury Hotel</title>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+    <header class="success-header">
+        <a class="success-header__back" href="./index.html">← Về trang chủ</a>
+        <div class="success-header__logo">Luxury Hotel</div>
+    </header>
+
+    <main class="success-page">
+        <section class="success-card">
+            <div class="success-banner">
+                <div class="success-icon">✓</div>
+                <h1>Thanh toán thành công</h1>
+                <p>Cảm ơn quý khách đã đặt phòng tại Luxury Hotel.</p>
+            </div>
+
+            <div class="success-body" id="successBody">
+                <div class="empty-box">Đang tải thông tin thanh toán...</div>
+            </div>
+
+            <div class="success-actions">
+                <a class="success-btn success-btn--home" href="./index.html">Quay về trang chủ</a>
+                <button class="success-btn success-btn--clear" type="button" id="clearPayment">Xóa thông tin đã lưu</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+          const PAYMENT_KEY = "luxury_hotel_payment_info";
+
+        function escapeHTML(value) {
+            return String(value || "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function dinhDangThoiGian(value) {
+            if (!value) return "Chưa có";
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return "Chưa có";
+
+            return date.toLocaleString("vi-VN", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
+            });
+        }
+
+        function layThongTinThanhToan() {
+            const raw = localStorage.getItem(PAYMENT_KEY);
+            if (!raw) return null;
+
+            try {
+                return JSON.parse(raw);
+            } catch (error) {
+                localStorage.removeItem(PAYMENT_KEY);
+                return null;
+            }
+        }
+
+        function renderThanhToanThanhCong() {
+            const box = document.querySelector("#successBody");
+            const data = layThongTinThanhToan();
+
+            if (!data) {
+                box.innerHTML = `
+                    <div class="empty-box">
+                        Chưa có thông tin thanh toán. Hãy quay lại trang thanh toán, điền thông tin và bấm thanh toán trước.
+                    </div>
+                `;
+                return;
+            }
+
+            box.innerHTML = `
+                <div class="info-box">
+                    <h2>Thông tin khách hàng</h2>
+                    <div class="info-list">
+                        <div class="info-row">
+                            <div class="info-label">Họ tên</div>
+                            <div class="info-value">${escapeHTML(data.customerName)}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Số điện thoại</div>
+                            <div class="info-value">${escapeHTML(data.customerPhone)}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">${escapeHTML(data.customerEmail)}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h2>Thông tin chuyển khoản</h2>
+                    <div class="info-list">
+                        <div class="info-row">
+                            <div class="info-label">Nội dung CK</div>
+                            <div class="info-value">
+                                <span class="transfer-content">${escapeHTML(data.transferContent)}</span>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Thời gian tạo</div>
+                            <div class="info-value">${dinhDangThoiGian(data.createdAt)}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Trạng thái</div>
+                            <div class="info-value">Đã thanh toán</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.querySelector("#clearPayment").addEventListener("click", function () {
+            localStorage.removeItem(PAYMENT_KEY);
+            alert("Đã xóa thông tin thanh toán đã lưu.");
+            window.location.href = "./index.html";
+        });
+
+        renderThanhToanThanhCong();
+    </script>
+</body>
+</html>

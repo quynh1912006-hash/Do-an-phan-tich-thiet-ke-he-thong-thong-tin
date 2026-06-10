@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán - Luxury Hotel</title>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+    <header class="payment-header">
+        <a class="payment-header__back" href="./datphong.html">← Quay lại đặt phòng</a>
+        <div class="payment-header__logo">Luxury Hotel</div>
+    </header>
+
+    <main class="payment-page">
+        <div class="payment-title">
+            <h1>Thanh toán đặt phòng</h1>
+            <p>Điền thông tin cá nhân, kiểm tra lại phòng đã đặt rồi bấm thanh toán để hiện mã QR chuyển khoản.</p>
+        </div>
+
+        <div class="payment-layout">
+            <section class="payment-card">
+                <div class="payment-card__head">
+                    <h2>Thông tin cá nhân</h2>
+                </div>
+                <div class="payment-card__body">
+                    <form id="paymentForm">
+                        <div class="form-group">
+                            <label for="customerName">Họ tên</label>
+                            <input type="text" id="customerName" placeholder="Nhập họ tên khách hàng" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="customerPhone">Số điện thoại</label>
+                            <input type="tel" id="customerPhone" placeholder="Nhập số điện thoại" pattern="[0-9]{9,11}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="customerEmail">Email</label>
+                            <input type="email" id="customerEmail" placeholder="Nhập email" required>
+                        </div>
+
+                        <button class="btn-pay" id="payButton" type="submit">Thanh toán</button>
+                    </form>
+
+                    <div class="qr-panel" id="qrPanel">
+                        <div class="qr-grid">
+                            <div class="qr-image-box">
+                                <img id="qrImage" src="./img/qr.jpg" alt="Mã QR chuyển khoản">
+                                <p class="qr-error" id="qrError">Không tìm thấy ảnh QR. Hãy đặt file <b>qr.jpg</b> vào thư mục <b>img</b>.</p>
+                            </div>
+
+                            <div class="transfer-info">
+                                <h3>Quét mã để chuyển khoản</h3>
+                                <p class="transfer-note">Nội dung chuyển khoản:</p>
+                                <div class="transfer-content" id="transferContent">TENKHACHHANG-RANDOMNUMBER-LUXURY HOTEL</div>
+                                <div class="countdown-box">
+                                    Còn lại: <span id="countdown">15:00</span>
+                                </div>
+                                <br>
+                                <button class="copy-btn" type="button" id="copyTransferContent">Copy nội dung chuyển khoản</button>
+                                <button class="confirm-payment-btn" type="button" id="confirmPaymentSuccess">Tôi đã chuyển khoản</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="payment-card">
+                <div class="payment-card__head">
+                    <h2>Thông tin phòng đã đặt</h2>
+                </div>
+                <div class="payment-card__body" id="bookingInfo">
+                    <div class="booking-empty">Đang tải thông tin đặt phòng...</div>
+                </div>
+            </aside>
+        </div>
+    </main>
+    <script>
+        const STORAGE_KEY = "luxury_hotel_booking";
+
+        const danhSachKhachSan = [
+            {
+                id: "fiesta-phu-quoc",
+                name: "VinHolidays Fiesta Phú Quốc",
+                address: "Khu Du lịch Bãi Dài, khu phố Gành Dầu, đặc khu Phú Quốc, tỉnh An Giang",
+                image: "./img/wPhuQuoc.jpg",
+                rooms: [
+                    {
+                        id: "pq-standard-double",
+                        name: "Phòng Tiêu Chuẩn Giường Đôi",
+                        capacity: 4,
+                        area: "28m²",
+                        bed: "1 giường đôi",
+                        price: 1550000,
+                        images: ["./img/wPhuQuoc.jpg", "./img/phuquoc3.jpg", "./img/banner.JPG.webp"]
+                    },
+                    {
+                        id: "pq-family-suite",
+                        name: "Phòng Gia Đình",
+                        capacity: 6,
+                        area: "55m²",
+                        bed: "2 giường đôi",
+                        price: 2600000,
+                        images: ["./img/phuquoc3.jpg", "./img/wPhuQuoc.jpg", "./img/sale.webp"]
+                    }
+                ]
+            },
+            {
+                id: "wonderland-phu-quoc",
+                name: "VinWonders Wonderland Phú Quốc",
+                address: "Bãi Dài, Phú Quốc, Kiên Giang",
+                image: "./img/phuquoc3.jpg",
+                rooms: [
+                    {
+                        id: "wonder-superior",
+                        name: "Phòng Superior Garden",
+                        capacity: 3,
+                        area: "36m²",
+                        bed: "1 giường đôi + 1 giường đơn",
+                        price: 1800000,
+                        images: ["./img/phuquoc3.jpg", "./img/wPhuQuoc.jpg", "./img/banner.JPG.webp"]
+                    },
+                    {
+                        id: "wonder-deluxe",
+                        name: "Phòng Deluxe View Biển",
+                        capacity: 4,
+                        area: "42m²",
+                        bed: "1 giường đôi lớn",
+                        price: 2200000,
+                        images: ["./img/wPhuQuoc.jpg", "./img/phuquoc3.jpg", "./img/sale.webp"]
+                    }
+                ]
+            },
+            {
+                id: "resort-phu-quoc",
+                name: "Luxury Resort Phú Quốc",
+                address: "Bãi Trường, Phú Quốc, Kiên Giang",
+                image: "./img/wPhuQuoc.jpg",
+                rooms: [
+                    {
+                        id: "resort-villa-pool",
+                        name: "Villa Hồ Bơi Riêng",
+                        capacity: 8,
+                        area: "120m²",
+                        bed: "3 phòng ngủ",
+                        price: 4200000,
+                        images: ["./img/wPhuQuoc.jpg", "./img/phuquoc3.jpg", "./img/sale.webp"]
+                    }
+                ]
+            },
+            {
+                id: "nha-trang-resort",
+                name: "Vinpearl Luxury Nha Trang",
+                address: "Đảo Hòn Tre, Nha Trang, Khánh Hòa",
+                image: "./img/nhatrangbeach.jpg",
+                rooms: [
+                    {
+                        id: "nt-ocean-view",
+                        name: "Phòng Ocean View",
+                        capacity: 3,
+                        area: "35m²",
+                        bed: "1 giường đôi",
+                        price: 1700000,
+                        images: ["./img/nhatrangbeach.jpg", "./img/nhatrangamthuc.jpg", "./img/banner.JPG.webp"]
+                    },
+                    {
+                        id: "nt-family",
+                        name: "Căn Hộ 2 Phòng Ngủ Gần Biển",
+                        capacity: 6,
+                        area: "75m²",
+                        bed: "2 phòng ngủ",
+                        price: 3000000,
+                        images: ["./img/nhatrangbeach.jpg", "./img/nhatrangamthuc.jpg", "./img/sale.webp"]
+                    }
+                ]
+            },
+            {
+                id: "nha-trang-beach",
+                name: "Nha Trang Beach Hotel",
+                address: "Đường Trần Phú, Nha Trang, Khánh Hòa",
+                image: "./img/nhatrangbeach.jpg",
+                rooms: [
+                    {
+                        id: "beach-standard",
+                        name: "Phòng Tiêu Chuẩn Gần Biển",
+                        capacity: 4,
+                        area: "32m²",
+                        bed: "1 giường đôi lớn",
+                        price: 1450000,
+                        images: ["./img/nhatrangbeach.jpg", "./img/nhatrangamthuc.jpg", "./img/banner.JPG.webp"]
+                    }
+                ]
+            },
+            {
+                id: "resort-golf-hoi-an",
+                name: "Resort & Golf Hội An",
+                address: "Cửa Đại, Hội An, Quảng Nam",
+                image: "./img/Hoi An At Night.jpg",
+                rooms: [
+                    {
+                        id: "ha-classic",
+                        name: "Phòng Hội An Classic",
+                        capacity: 3,
+                        area: "34m²",
+                        bed: "1 giường đôi",
+                        price: 1600000,
+                        images: ["./img/Hoi An At Night.jpg", "./img/banner.JPG.webp", "./img/sale.webp"]
+                    },
+                    {
+                        id: "ha-golf-villa",
+                        name: "Biệt Thự Sân Golf",
+                        capacity: 8,
+                        area: "150m²",
+                        bed: "3 phòng ngủ + phòng khách",
+                        price: 5000000,
+                        images: ["./img/Hoi An At Night.jpg", "./img/banner.JPG.webp", "./img/huce.png"]
+                    }
+                ]
+            }
+        ];
+
+        function dinhDangTien(value) {
+            return new Intl.NumberFormat("vi-VN").format(value) + " đ";
+        }
+
+        function dinhDangNgay(value) {
+            if (!value) return "Chưa chọn";
+            const date = new Date(value + "T00:00:00");
+            return date.toLocaleDateString("vi-VN", {
+                weekday: "short",
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
+            });
+        }
+
+        function tinhSoDem(dayin, dayout) {
+            if (!dayin || !dayout) return 1;
+            const start = new Date(dayin + "T00:00:00");
+            const end = new Date(dayout + "T00:00:00");
+            const nights = Math.ceil((end - start) / (24 * 60 * 60 * 1000));
+            return nights > 0 ? nights : 1;
+        }
+
+        function tinhGiamGia(coupon) {
+            const code = String(coupon || "").trim().toUpperCase().replace(/\s+/g, "");
+            return code === "LUXURYHOTEL" ? 0.1 : 0;
+        }
+
+        function layDatPhong() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return null;
+
+            try {
+                return JSON.parse(raw);
+            } catch (error) {
+                localStorage.removeItem(STORAGE_KEY);
+                return null;
+            }
+        }
+
+        function timPhong(hotelId, roomId) {
+            const hotel = danhSachKhachSan.find(function (item) {
+                return item.id === hotelId;
+            });
+
+            if (!hotel) return null;
+
+            const room = hotel.rooms.find(function (item) {
+                return item.id === roomId;
+            });
+
+            if (!room) return null;
+            return { hotel, room };
+        }
+
+        function renderBookingInfo() {
+            const box = document.querySelector("#bookingInfo");
+            const payButton = document.querySelector("#payButton");
+            const booking = layDatPhong();
+
+            if (!booking) {
+                box.innerHTML = `
+                    <div class="booking-empty">
+                        Chưa có phòng đã đặt. Bạn hãy quay lại trang đặt phòng và bấm chọn phòng trước khi thanh toán.
+                    </div>
+                `;
+                payButton.disabled = true;
+                return;
+            }
+
+            const found = timPhong(booking.hotelId, booking.roomId);
+            const searchData = booking.searchData || {};
+
+            if (!found) {
+                box.innerHTML = `
+                    <div class="booking-empty">
+                        Không tìm thấy dữ liệu phòng. Bạn hãy quay lại trang đặt phòng và chọn lại phòng.
+                    </div>
+                `;
+                payButton.disabled = true;
+                return;
+            }
+
+            const nights = tinhSoDem(searchData.dayin, searchData.dayout);
+            const discountRate = tinhGiamGia(searchData.coupon);
+            const subtotal = found.room.price * nights;
+            const discount = subtotal * discountRate;
+            const total = subtotal - discount;
+            const roomCount = Number(searchData.rooms) || 1;
+            const adult = Number(searchData.adult) || 1;
+            const child = Number(searchData.child) || 0;
+
+            box.innerHTML = `
+                <div class="booking-hotel">
+                    <img src="${found.room.images[0] || found.hotel.image}" alt="${found.room.name}">
+                    <div>
+                        <h3>${found.hotel.name}</h3>
+                        <p>${found.hotel.address}</p>
+                    </div>
+                </div>
+
+                <div class="booking-room">
+                    <b>${found.room.name}</b>
+                    <p>${found.room.bed} · ${found.room.area} · Tối đa ${found.room.capacity} người</p>
+                    <p>${roomCount} phòng · ${adult} người lớn${child > 0 ? ` · ${child} trẻ em` : ""}</p>
+                    <p>${dinhDangNgay(searchData.dayin)} → ${dinhDangNgay(searchData.dayout)} · ${nights} đêm</p>
+                </div>
+
+                <div class="price-row">
+                    <span>Giá phòng</span>
+                    <b>${dinhDangTien(found.room.price)} x ${nights}</b>
+                </div>
+                <div class="price-row">
+                    <span>Tạm tính</span>
+                    <b>${dinhDangTien(subtotal)}</b>
+                </div>
+                <div class="price-row">
+                    <span>Giảm giá</span>
+                    <b>-${dinhDangTien(discount)}</b>
+                </div>
+                <div class="price-total">
+                    <span>Tổng thanh toán</span>
+                    <strong>${dinhDangTien(total)}</strong>
+                </div>
+            `;
+        }
+
+        function boDauTiengViet(text) {
+            return text.normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/đ/g, "d")
+                .replace(/Đ/g, "D");
+        }
+
+        function taoNoiDungChuyenKhoan(customerName) {
+            const cleanName = boDauTiengViet(customerName)
+                .toUpperCase()
+                .replace(/[^A-Z0-9]/g, "");
+            const randomNumber = Math.floor(100000 + Math.random() * 900000);
+            return `${cleanName}-${randomNumber}-LUXURY HOTEL`;
+        }
+
+        let countdownInterval = null;
+
+        function batDauDemNguoc(seconds) {
+            const countdown = document.querySelector("#countdown");
+            clearInterval(countdownInterval);
+
+            function render() {
+                const minutes = Math.floor(seconds / 60);
+                const remainSeconds = seconds % 60;
+                countdown.textContent = String(minutes).padStart(2, "0") + ":" + String(remainSeconds).padStart(2, "0");
+
+                if (seconds <= 0) {
+                    clearInterval(countdownInterval);
+                    countdown.textContent = "00:00";
+                    alert("Mã thanh toán đã hết hạn. Vui lòng bấm Thanh toán để tạo lại mã mới.");
+                }
+
+                seconds = seconds - 1;
+            }
+
+            render();
+            countdownInterval = setInterval(render, 1000);
+        }
+
+        const qrImage = document.querySelector("#qrImage");
+        const qrError = document.querySelector("#qrError");
+        let triedRootQr = false;
+
+        qrImage.addEventListener("error", function () {
+            if (!triedRootQr) {
+                triedRootQr = true;
+                qrImage.src = "./qr.jpg";
+                return;
+            }
+
+            qrImage.style.display = "none";
+            qrError.style.display = "block";
+        });
+
+        document.querySelector("#paymentForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const form = event.currentTarget;
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const customerName = document.querySelector("#customerName").value.trim();
+            const customerPhone = document.querySelector("#customerPhone").value.trim();
+            const customerEmail = document.querySelector("#customerEmail").value.trim();
+            const transferContent = taoNoiDungChuyenKhoan(customerName);
+
+            const paymentInfo = {
+                customerName: customerName,
+                customerPhone: customerPhone,
+                customerEmail: customerEmail,
+                transferContent: transferContent,
+                createdAt: new Date().toISOString()
+            };
+
+            localStorage.setItem("luxury_hotel_payment_info", JSON.stringify(paymentInfo));
+            document.querySelector("#transferContent").textContent = transferContent;
+            document.querySelector("#qrPanel").classList.add("is-show");
+            batDauDemNguoc(15 * 60);
+        });
+
+        document.querySelector("#copyTransferContent").addEventListener("click", function () {
+            const content = document.querySelector("#transferContent").textContent;
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(content).then(function () {
+                    alert("Đã copy nội dung chuyển khoản.");
+                });
+            } else {
+                alert(content);
+            }
+        });
+
+        document.querySelector("#confirmPaymentSuccess").addEventListener("click", function () {
+            const paymentInfo = localStorage.getItem("luxury_hotel_payment_info");
+
+            if (!paymentInfo) {
+                alert("Bạn cần điền thông tin và bấm Thanh toán trước.");
+                return;
+            }
+
+            window.location.href = "./thanhtoanthanhcong.html";
+        });
+
+        renderBookingInfo();
+    </script>
+</body>
+</html>
